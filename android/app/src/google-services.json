@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "859556196765",
+    "project_id": "dalupotha-6c888",
+    "storage_bucket": "dalupotha-6c888.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:859556196765:android:1af15329123f26150d7f74",
+        "android_client_info": {
+          "package_name": "com.shalika.dalu_potha"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "859556196765-v4o26sim1eppp37gklefk96cgg9u7ubv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC32kTjxeDHAdUk8j4on34KMRdz3NgG6JQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "859556196765-v4o26sim1eppp37gklefk96cgg9u7ubv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
