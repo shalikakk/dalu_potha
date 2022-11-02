@@ -117,7 +117,6 @@ class _HomeScreenState extends State<HomeScreen> {
         child: ListTile(
           title: Text(customer.customerName ?? ""),
           subtitle: Text(customer.customerAddress ?? ""),
-          trailing: Text(customer.totalAmount.toString() + " Kg"),
         ),
       ),
     );

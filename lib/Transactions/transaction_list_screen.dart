@@ -1,6 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dalu_potha/Transactions/model/monthly_total.dart';
 import 'package:dalu_potha/Transactions/model/transaction_model.dart';
+import 'package:dalu_potha/Transactions/summar_screen.dart';
+import 'package:dalu_potha/enums/transaction_type.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:intl/intl.dart';
@@ -25,7 +28,7 @@ class _TransactionListScreenState extends State<TransactionListScreen> {
   // format date in required form here we use yyyy-MM-dd that means time is removed
 
   DateTime selectedDate = DateTime.now();
-
+  List<TransactionModel> _myList = [];
   Future<Null> _selectTime(BuildContext context) async {
     DateTime? pickedDate = await showDatePicker(
         context: context,
@@ -52,6 +55,92 @@ class _TransactionListScreenState extends State<TransactionListScreen> {
     }
   }
 
+  Color cardBgColor(String type) {
+    switch (type) {
+      case "Dalu":
+        {
+          return Colors.greenAccent;
+        }
+
+      case "tea":
+        {
+          return Colors.orangeAccent;
+        }
+
+      case "Advance":
+        {
+          return Colors.redAccent;
+        }
+
+      default:
+        {
+          return Colors.white;
+        }
+    }
+  }
+
+  String measureType(String type) {
+    switch (type) {
+      case "Dalu":
+        {
+          return "Kg";
+        }
+
+      case "tea":
+        {
+          return "";
+        }
+
+      case "Advance":
+        {
+          return "0";
+        }
+
+      default:
+        {
+          return "";
+        }
+    }
+  }
+
+  void showSummery(BuildContext context) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            scrollable: true,
+            title: Text('Summery'),
+            content: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Form(
+                child: Column(
+                  children: <Widget>[
+                    TextFormField(
+                      decoration: InputDecoration(
+                        labelText: '1 kilo Price',
+                        icon: Icon(Icons.one_k),
+                      ),
+                    ),
+                    TextFormField(
+                      decoration: InputDecoration(
+                        labelText: 'Email',
+                        icon: Icon(Icons.email),
+                      ),
+                    ),
+                    TextFormField(
+                      decoration: InputDecoration(
+                        labelText: 'Message',
+                        icon: Icon(Icons.message),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        });
+  }
+
   TimeOfDay selectedTime = TimeOfDay.now();
 
   @override
@@ -66,6 +155,23 @@ class _TransactionListScreenState extends State<TransactionListScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.customer.customerName ?? ""),
+        actions: [
+          IconButton(
+              onPressed: () {
+                showNewAlert();
+              },
+              icon: Icon(Icons.add)),
+          IconButton(
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => SummeryScreen(
+                            title: "",
+                            lastMonthsList: getLastMonthRecords(_myList))));
+              },
+              icon: Icon(Icons.check))
+        ],
       ),
       body: StreamBuilder(
           stream: FirebaseFirestore.instance
@@ -80,7 +186,7 @@ class _TransactionListScreenState extends State<TransactionListScreen> {
               return Center(child: CircularProgressIndicator());
             }
             Customer customer = Customer.fromSnapshot(snapshot.data);
-            List<TransactionModel> _myList = [];
+
             _myList = customer.transactions;
             _myList.sort(
                 (a, b) => a.transaction_dttm!.compareTo(b.transaction_dttm!));
@@ -167,28 +273,35 @@ class _TransactionListScreenState extends State<TransactionListScreen> {
                           children: [
                         if (isFirstShow) Text(current_formated_month),
                         Card(
+                          color:
+                              cardBgColor(transactionModel.transaction_type!),
                           child: ListTile(
-                            title: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
+                            trailing: Text(transactionModel.amount.toString() +
+                                measureType(
+                                    transactionModel.transaction_type!)),
+                            subtitle:
                                 Text(transactionModel.transaction_dttm ?? ""),
-                                Text(transactionModel.amount.toString() + " Kg")
-                              ],
-                            ),
+                            title: Text(transactionModel.transaction_type!),
                           ),
                         ),
+                        // (current_formated_month != next_formattedDate)
+                        //     ? Row(
+                        //         mainAxisAlignment: MainAxisAlignment.end,
+                        //         children: [
+                        //           Padding(
+                        //             padding: const EdgeInsets.only(right: 8.0),
+                        //             child: Text(
+                        //                 "${monthlyTotal[int.parse(current_formated_month_for_total)]} Kg"),
+                        //           ),
+                        //         ],
+                        //       )
+                        //     : Container(),
                         (current_formated_month != next_formattedDate)
-                            ? Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  Text(monthlyTotal[int.parse(
-                                          current_formated_month_for_total)]
-                                      .toString()),
-                                ],
+                            ? Padding(
+                                padding:
+                                    const EdgeInsets.only(top: 16.0, left: 8),
+                                child: Text(next_formattedDate),
                               )
-                            : Container(),
-                        (current_formated_month != next_formattedDate)
-                            ? Text(next_formattedDate)
                             : Container()
                       ]));
 
@@ -282,98 +395,122 @@ class _TransactionListScreenState extends State<TransactionListScreen> {
                   return Container();
                 });
           }),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
-        onPressed: () {
-          showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return AlertDialog(
-                  scrollable: true,
-                  title: Text('Add New Amount'),
-                  content: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Form(
-                      child: Column(
-                        children: <Widget>[
-                          TextFormField(
-                            controller: dateController,
-                            decoration: InputDecoration(
-                                labelText: 'Date',
-                                icon: Icon(Icons.date_range),
-                                suffix: IconButton(
-                                    onPressed: () async {
-                                      DateTime? pickedDate =
-                                          await showDatePicker(
-                                              context: context,
-                                              initialDate: DateTime
-                                                  .now(), //get today's date
-                                              firstDate: DateTime(
-                                                  2000), //DateTime.now() - not to allow to choose before today.
-                                              lastDate: DateTime.now());
-
-                                      if (pickedDate != null) {
-                                        print(
-                                            pickedDate); //get the picked date in the format => 2022-07-04 00:00:00.000
-                                        String formattedDate =
-                                            DateFormat('yyyy-MM-dd').format(
-                                                pickedDate); // format date in required form here we use yyyy-MM-dd that means time is removed
-                                        print(
-                                            formattedDate); //formatted date output using intl package =>  2022-07-04
-                                        //You can format date as per your need
-
-                                        setState(() {
-                                          dateController.text =
-                                              formattedDate; //set foratted date to TextField value.
-                                        });
-                                      } else {
-                                        print("Date is not selected");
-                                      }
-                                    },
-                                    icon: Icon(Icons.calendar_today))),
-                          ),
-                          TextFormField(
-                            controller: amountController,
-                            keyboardType: TextInputType.number,
-                            decoration: InputDecoration(
-                              labelText: 'Amount',
-                              icon: Icon(Icons.scale),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  actions: [
-                    TextButton(
-                        child: Text("Cancel"),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        }),
-                    TextButton(
-                        child: Text("Save"),
-                        onPressed: () {
-                          double total = widget.customer.totalAmount +
-                              double.parse(amountController.text);
-                          TransactionModel tm = TransactionModel(
-                              transaction_dttm: dateController.text,
-                              amount: double.parse(amountController.text));
-                          repository.updatePassengersConnectedWithDRiver(
-                              widget.email,
-                              tm,
-                              widget.customer.referenceID!,
-                              total);
-                          setState(() {});
-                          Navigator.pop(context);
-                        })
-                  ],
-                );
-              });
-        },
-      ),
     );
   }
 
+  showNewAlert() {
+    TransactionType _chosenValue = TransactionType.leaf;
+    var amountController = TextEditingController();
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            scrollable: true,
+            title: Text('Add New Amount'),
+            content: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Form(
+                child: Column(
+                  children: <Widget>[
+                    TextFormField(
+                      controller: dateController,
+                      decoration: InputDecoration(
+                          labelText: 'Date',
+                          icon: Icon(Icons.date_range),
+                          suffix: IconButton(
+                              onPressed: () async {
+                                DateTime? pickedDate = await showDatePicker(
+                                    context: context,
+                                    initialDate:
+                                        DateTime.now(), //get today's date
+                                    firstDate: DateTime(
+                                        2000), //DateTime.now() - not to allow to choose before today.
+                                    lastDate: DateTime.now());
+
+                                if (pickedDate != null) {
+                                  String formattedDate =
+                                      DateFormat('yyyy-MM-dd').format(
+                                          pickedDate); // format date in required form here we use yyyy-MM-dd that means time is removed
+
+                                  setState(() {
+                                    dateController.text =
+                                        formattedDate; //set foratted date to TextField value.
+                                  });
+                                } else {
+                                  print("Date is not selected");
+                                }
+                              },
+                              icon: Icon(Icons.calendar_today))),
+                    ),
+                    StatefulBuilder(
+                      builder: (BuildContext context, StateSetter setState) {
+                        return DropdownButton<TransactionType>(
+                            value: _chosenValue,
+                            onChanged: (newValue) {
+                              setState(() {
+                                _chosenValue = newValue!;
+                              });
+                            },
+                            items: TransactionType.values
+                                .map((TransactionType classType) {
+                              return DropdownMenuItem<TransactionType>(
+                                  value: classType,
+                                  child: Text(classType.name));
+                            }).toList());
+                      },
+                    ),
+                    TextFormField(
+                      controller: amountController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: 'Amount',
+                        icon: Icon(Icons.scale),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(
+                  child: Text("Cancel"),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  }),
+              TextButton(
+                  child: Text("Save"),
+                  onPressed: () {
+                    print(_chosenValue);
+                    double total = widget.customer.totalAmount +
+                        double.parse(amountController.text);
+                    TransactionModel tm = TransactionModel(
+                        transaction_type: _chosenValue.name,
+                        transaction_dttm: dateController.text,
+                        amount: double.parse(amountController.text));
+                    repository.updatePassengersConnectedWithDRiver(
+                        widget.email, tm, widget.customer.referenceID!, total);
+                    setState(() {});
+                    Navigator.pop(context);
+                  })
+            ],
+          );
+        });
+  }
+
+  List<TransactionModel> getLastMonthRecords(
+      List<TransactionModel> currentList) {
+    List<TransactionModel> lastMonthsList = [];
+    String currentTransactionMonth = DateFormat.yMMMM('en_US')
+        .format(DateTime.parse(currentList.last.transaction_dttm!));
+    for (TransactionModel transactionModel in currentList) {
+      String nextTransactionMonth = DateFormat.yMMMM('en_US')
+          .format(DateTime.parse(transactionModel.transaction_dttm!));
+      if (currentTransactionMonth == nextTransactionMonth) {
+        lastMonthsList.add(transactionModel);
+      }
+    }
+    return lastMonthsList;
+  }
   // Future<Null> _selectDate(
   //   BuildContext context,
   // ) async {
