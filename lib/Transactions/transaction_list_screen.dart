@@ -1,11 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dalu_potha/Transactions/model/monthly_total.dart';
 import 'package:dalu_potha/Transactions/model/transaction_model.dart';
 import 'package:dalu_potha/Transactions/summar_screen.dart';
 import 'package:dalu_potha/enums/transaction_type.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:intl/intl.dart';
 
 import '../auth/model/customer_model.dart';
@@ -57,19 +55,14 @@ class _TransactionListScreenState extends State<TransactionListScreen> {
 
   Color cardBgColor(String type) {
     switch (type) {
-      case "Dalu":
+      case "leaf":
         {
-          return Colors.greenAccent;
+          return Colors.green.shade100;
         }
 
-      case "tea":
+      case "advance":
         {
-          return Colors.orangeAccent;
-        }
-
-      case "Advance":
-        {
-          return Colors.redAccent;
+          return Colors.red.shade100;
         }
 
       default:
@@ -81,7 +74,7 @@ class _TransactionListScreenState extends State<TransactionListScreen> {
 
   String measureType(String type) {
     switch (type) {
-      case "Dalu":
+      case "leaf":
         {
           return "Kg";
         }

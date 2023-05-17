@@ -1,1 +1,1 @@
-enum TransactionType { leaf, teaPackets, advance }
+enum TransactionType { Leaf, teaPackets, advance }

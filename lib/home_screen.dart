@@ -55,13 +55,13 @@ class _HomeScreenState extends State<HomeScreen> {
             const UserAccountsDrawerHeader(
               // <-- SEE HERE
               accountName: Text(
-                "Pinkesh Darji",
+                "Shalika Lahiru",
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                 ),
               ),
               accountEmail: Text(
-                "pinkesh.earth@gmail.com",
+                "Shalikalahiru@gmail.com",
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                 ),
